@@ -4,7 +4,7 @@ from rest_framework import serializers
 User = get_user_model()
 
 
-class UserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True
     )
@@ -22,3 +22,9 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
         )
+
+    def create(self, validated_data):
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user

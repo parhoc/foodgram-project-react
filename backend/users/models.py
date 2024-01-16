@@ -16,12 +16,10 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(
         max_length=150,
         verbose_name='Имя',
-        unique=True,
     )
     last_name = models.CharField(
         max_length=150,
         verbose_name='Фамилия',
-        unique=True,
     )
 
     class Meta:
