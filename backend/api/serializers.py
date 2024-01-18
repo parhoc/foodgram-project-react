@@ -1,5 +1,3 @@
-import re
-
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -46,8 +44,3 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = (
             'id',
         )
-
-    def validate_color(self, value):
-        if re.search(Tag.HEX_COLOR_REGEX, value):
-            return True
-        return False
