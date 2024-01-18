@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from recipes.models import Tag
+from recipes.models import Ingredient, Tag
 
 User = get_user_model()
 
@@ -40,6 +40,19 @@ class TagSerializer(serializers.ModelSerializer):
             'name',
             'color',
             'slug',
+        )
+        read_only_fields = (
+            'id',
+        )
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = (
+            'id',
+            'name',
+            'measurement_unit',
         )
         read_only_fields = (
             'id',

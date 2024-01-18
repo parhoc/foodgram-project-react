@@ -2,8 +2,15 @@ from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 
-from .serializers import CustomUserSerializer, TagSerializer
-from recipes.models import Tag
+from .serializers import (
+    CustomUserSerializer,
+    IngredientSerializer,
+    TagSerializer
+)
+from recipes.models import (
+    Ingredient,
+    Tag,
+)
 
 User = get_user_model()
 
@@ -26,4 +33,11 @@ class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                  viewsets.GenericViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
+
+
+class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                        viewsets.GenericViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
     pagination_class = None
