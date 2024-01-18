@@ -2,7 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, TagSerializer
+from recipes.models import Tag
 
 User = get_user_model()
 
@@ -19,3 +20,10 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
+
+
+class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                 viewsets.GenericViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
