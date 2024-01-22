@@ -52,6 +52,9 @@ class RecipeAdmin(admin.ModelAdmin):
     search_fields = (
         'name',
     )
+    filter_horizontal = (
+        'ingredients',
+    )
 
 
 @admin.register(RecipeIngredient)
@@ -59,6 +62,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     list_display = (
         'recipe',
         'ingredient',
+        'amount',
     )
     list_filter = (
         'recipe',

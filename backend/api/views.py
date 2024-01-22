@@ -5,10 +5,13 @@ from rest_framework.decorators import action
 from .serializers import (
     CustomUserSerializer,
     IngredientSerializer,
-    TagSerializer
+    RecipeSerializer,
+    RecipeCreateSerializer,
+    TagSerializer,
 )
 from recipes.models import (
     Ingredient,
+    Recipe,
     Tag,
 )
 
@@ -41,3 +44,24 @@ class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+
+
+class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
+    http_method_names = [
+        'get',
+        'post',
+        'patch',
+        'delete',
+        'head',
+        'options',
+        'trace'
+    ]
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'partial_update'):
+            return RecipeCreateSerializer
+        return RecipeSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
