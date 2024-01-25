@@ -128,3 +128,37 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.ingredient}, {self.amount}'
+
+
+class Subscription(models.Model):
+    """
+    User subscription model.
+
+    Fields:
+    * user (Int) - FK to user, cascade on delete;
+    * subscription (Int) - FK to other user, cascade on delete.
+    """
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscibers'
+    )
+    subscription = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'subscription'],
+                name='unique_user_subscription'
+            )
+        ]
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.subscription.username}'

@@ -1,13 +1,43 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import Base64ImageField
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    Subscription,
+    Tag
+)
 
 User = get_user_model()
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField(
+        read_only=True
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+        )
+
+    def get_is_subscribed(self, obj):
+        if self.context['request'].user.is_authenticated:
+            return self.context['request'].user.subscriptions.filter(
+                pk=obj.pk).exists()
+        return False
+
+
+class CustomUserCreateSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True
     )
@@ -21,9 +51,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'password',
-        )
-        read_only_fields = (
-            'id',
         )
 
     def create(self, validated_data):
@@ -56,9 +83,6 @@ class IngredientSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit',
-        )
-        read_only_fields = (
-            'id',
         )
 
 
@@ -176,3 +200,36 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return RecipeSerializer(
             context=self.context).to_representation(instance)
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
+    )
+    subscription = CustomUserSerializer(
+        many=True,
+        read_only=True
+    )
+
+    class Meta:
+        model = Subscription
+        fields = (
+            'id',
+            'subscription',
+        )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Subscription.objects.all(),
+                fields=('user', 'subscription')
+            ),
+        ]
+
+    def validate_subscription(self, value):
+        """
+        Validate that `user` is not equal to `subscription`.
+        """
+        if value == self.context['request'].user:
+            raise serializers.ValidationError(
+                "User can't subscribe to themself."
+            )
+        return value

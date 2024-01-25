@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
-from rest_framework import mixins, viewsets
+from djoser.serializers import SetPasswordSerializer
+from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from .serializers import (
     CustomUserSerializer,
+    CustomUserCreateSerializer,
     IngredientSerializer,
     RecipeSerializer,
     RecipeCreateSerializer,
@@ -26,10 +29,33 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
     def get_instance(self):
         return self.request.user
 
-    @action(["get"], detail=False)
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CustomUserCreateSerializer
+        if self.action == 'set_password':
+            return SetPasswordSerializer
+        return CustomUserSerializer
+
+    @action(['get'], detail=False)
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
+
+    @action(['get'], detail=False)
+    def subscriptions(self, request):
+        serializer = CustomUserSerializer(
+            request.user.subscriptions,
+            many=True
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(['post'], detail=False)
+    def set_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.request.user.set_password(serializer.data["new_password"])
+        self.request.user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
