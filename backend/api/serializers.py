@@ -33,7 +33,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         if self.context['request'].user.is_authenticated:
             return self.context['request'].user.subscriptions.filter(
-                pk=obj.pk).exists()
+                subscription=obj).exists()
         return False
 
 
@@ -202,19 +202,50 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context=self.context).to_representation(instance)
 
 
+class RecipeSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+
+
+class UserSubscriberSerializer(CustomUserSerializer):
+    recipes_count = serializers.SerializerMethodField(read_only=True)
+    recipes = RecipeSubscriptionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count',
+        )
+
+    def get_recipes_count(self, obj):
+        return obj.recipes.count()
+
+
 class SubscriptionSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(
+    user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all()
     )
-    subscription = CustomUserSerializer(
-        many=True,
-        read_only=True
+    subscription = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all()
     )
 
     class Meta:
         model = Subscription
         fields = (
-            'id',
+            'user',
             'subscription',
         )
         validators = [
@@ -233,3 +264,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
                 "User can't subscribe to themself."
             )
         return value
+
+    def to_representation(self, instance):
+        return UserSubscriberSerializer(
+            context=self.context).to_representation(instance.subscription)

@@ -142,12 +142,12 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscibers'
+        related_name='subscriptions'
     )
     subscription = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscriptions'
+        related_name='subscribers'
     )
 
     class Meta:
@@ -159,6 +159,9 @@ class Subscription(models.Model):
         ]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        ordering = (
+            'user',
+        )
 
     def __str__(self):
         return f'{self.user.username} -> {self.subscription.username}'

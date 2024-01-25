@@ -4,6 +4,7 @@ from .models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
+    Subscription,
     Tag,
 )
 
@@ -71,4 +72,12 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     search_fields = (
         'recipe',
         'ingredient'
+    )
+
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'subscription',
     )

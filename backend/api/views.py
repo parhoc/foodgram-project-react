@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -10,11 +11,13 @@ from .serializers import (
     IngredientSerializer,
     RecipeSerializer,
     RecipeCreateSerializer,
+    SubscriptionSerializer,
     TagSerializer,
 )
 from recipes.models import (
     Ingredient,
     Recipe,
+    Subscription,
     Tag,
 )
 
@@ -34,6 +37,8 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             return CustomUserCreateSerializer
         if self.action == 'set_password':
             return SetPasswordSerializer
+        if self.action in ('subscribe', 'subscriptions'):
+            return SubscriptionSerializer
         return CustomUserSerializer
 
     @action(['get'], detail=False)
@@ -43,11 +48,16 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     @action(['get'], detail=False)
     def subscriptions(self, request):
-        serializer = CustomUserSerializer(
-            request.user.subscriptions,
-            many=True
+        queryset = request.user.subscriptions.all()
+        page = self.paginate_queryset(queryset)
+        serializer = self.get_serializer(
+            page,
+            many=True,
+            context={
+                'request': request,
+            }
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.get_paginated_response(serializer.data)
 
     @action(['post'], detail=False)
     def set_password(self, request):
@@ -56,6 +66,36 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         self.request.user.set_password(serializer.data["new_password"])
         self.request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def create_subscription(self, user, subscription):
+        get_object_or_404(User, pk=subscription)
+        data = {
+            'user': user,
+            'subscription': subscription,
+        }
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def destroy_subscription(self, subscription):
+        user = self.get_object()
+        try:
+            instance = user.subscribers.get(subscription=subscription)
+        except Subscription.DoesNotExist:
+            return Response(
+                {'errors': 'Subscription does not exist.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(['post', 'delete'], detail=True)
+    def subscribe(self, request, pk):
+        if request.method == 'POST':
+            return self.create_subscription(request.user.pk, pk)
+        if request.method == 'DELETE':
+            return self.destroy_subscription(pk)
 
 
 class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
