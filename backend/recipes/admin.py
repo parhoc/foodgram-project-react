@@ -4,6 +4,7 @@ from .models import (
     Ingredient,
     Recipe,
     RecipeIngredient,
+    ShoppingCart,
     Subscription,
     Tag,
 )
@@ -80,4 +81,17 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = (
         'user',
         'subscription',
+    )
+    search_fields = (
+        'user',
+    )
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+    )
+    search_fields = (
+        'user',
     )

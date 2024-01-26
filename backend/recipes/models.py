@@ -142,12 +142,14 @@ class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscriptions'
+        related_name='subscriptions',
+        verbose_name='Пользователь'
     )
     subscription = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='subscribers'
+        related_name='subscribers',
+        verbose_name='Подписки'
     )
 
     class Meta:
@@ -165,3 +167,26 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user.username} -> {self.subscription.username}'
+
+
+class ShoppingCart(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='shoppingcart',
+        verbose_name='Пользователь'
+    )
+    recipes = models.ManyToManyField(
+        Recipe,
+        verbose_name='Рецепты'
+    )
+
+    class Meta:
+        verbose_name = 'Список покупок'
+        verbose_name_plural = 'Списки покупок'
+        ordering = (
+            'user',
+        )
+
+    def __str__(self) -> str:
+        return f'{self.user.username}: {self.recipes.count()}'

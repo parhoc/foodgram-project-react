@@ -31,9 +31,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        if self.context['request'].user.is_authenticated:
-            return self.context['request'].user.subscriptions.filter(
-                subscription=obj).exists()
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return user.subscriptions.filter(subscription=obj).exists()
         return False
 
 
@@ -131,6 +131,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         many=True
     )
     image = Base64ImageField()
+    is_in_shopping_cart = serializers.SerializerMethodField(
+        read_only=True
+    )
 
     class Meta:
         model = Recipe
@@ -139,11 +142,21 @@ class RecipeSerializer(serializers.ModelSerializer):
             'tags',
             'author',
             'ingredients',
+            'is_in_shopping_cart',
             'name',
             'image',
             'text',
             'cooking_time',
         )
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            try:
+                return user.shoppingcart.recipes.filter(pk=obj).exists()
+            except User.shoppingcart.RelatedObjectDoesNotExist:
+                return False
+        return False
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
