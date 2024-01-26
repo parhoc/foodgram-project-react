@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import SetPasswordSerializer
-from rest_framework import mixins, status, viewsets
+from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from .permissions import IsAuthorAdminOrReadOnly
 from .serializers import (
     CustomUserSerializer,
     CustomUserCreateSerializer,
@@ -41,12 +42,20 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             return SubscriptionSerializer
         return CustomUserSerializer
 
-    @action(['get'], detail=False)
+    @action(
+        ['get'],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def me(self, request, *args, **kwargs):
         self.get_object = self.get_instance
         return self.retrieve(request, *args, **kwargs)
 
-    @action(['get'], detail=False)
+    @action(
+        ['get'],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def subscriptions(self, request):
         queryset = request.user.subscriptions.all()
         page = self.paginate_queryset(queryset)
@@ -59,7 +68,11 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         )
         return self.get_paginated_response(serializer.data)
 
-    @action(['post'], detail=False)
+    @action(
+        ['post'],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def set_password(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -90,7 +103,11 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(['post', 'delete'], detail=True)
+    @action(
+        ['post', 'delete'],
+        detail=True,
+        permission_classes=(permissions.IsAuthenticated,)
+    )
     def subscribe(self, request, pk):
         if request.method == 'POST':
             return self.create_subscription(request.user.pk, pk)
@@ -123,6 +140,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         'options',
         'trace'
     ]
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorAdminOrReadOnly,
+    )
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
