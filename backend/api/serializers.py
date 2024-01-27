@@ -4,9 +4,11 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import Base64ImageField
 from recipes.models import (
+    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
+    ShoppingCart,
     Subscription,
     Tag
 )
@@ -153,23 +155,21 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def get_is_in_shopping_cart(self, obj):
+    def is_in(self, obj, model):
         user = self.context['request'].user
         if user.is_authenticated:
             try:
-                return user.shoppingcart.recipes.filter(pk=obj.pk).exists()
-            except User.shoppingcart.RelatedObjectDoesNotExist:
+                instance = model.objects.get(user=user.pk)
+                return instance.recipes.filter(pk=obj.pk).exists()
+            except model.DoesNotExist:
                 return False
         return False
 
+    def get_is_in_shopping_cart(self, obj):
+        return self.is_in(obj, ShoppingCart)
+
     def get_is_favorited(self, obj):
-        user = self.context['request'].user
-        if user.is_authenticated:
-            try:
-                return user.favorite.recipes.filter(pk=obj.pk).exists()
-            except User.favorite.RelatedObjectDoesNotExist:
-                return False
-        return False
+        return self.is_in(obj, Favorite)
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
