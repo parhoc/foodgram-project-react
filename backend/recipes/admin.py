@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import (
+    Favorite,
     Ingredient,
     Recipe,
     RecipeIngredient,
@@ -89,6 +90,16 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+    )
+    search_fields = (
+        'user',
+    )
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'user',
     )

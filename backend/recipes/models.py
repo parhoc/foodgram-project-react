@@ -190,3 +190,26 @@ class ShoppingCart(models.Model):
 
     def __str__(self) -> str:
         return f'{self.user.username}: {self.recipes.count()}'
+
+
+class Favorite(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favorite',
+        verbose_name='Пользователь'
+    )
+    recipes = models.ManyToManyField(
+        Recipe,
+        verbose_name='Рецепты'
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранное'
+        ordering = (
+            'user',
+        )
+
+    def __str__(self) -> str:
+        return f'{self.user.username}: {self.recipes.count()}'
