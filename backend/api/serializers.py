@@ -72,7 +72,6 @@ class TagSerializer(serializers.ModelSerializer):
             'slug',
         )
         read_only_fields = (
-            'id',
             'name',
             'color'
         )
@@ -158,11 +157,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def is_in(self, obj, model):
         user = self.context['request'].user
         if user.is_authenticated:
-            try:
-                instance = model.objects.get(user=user.pk)
-                return instance.recipes.filter(pk=obj.pk).exists()
-            except model.DoesNotExist:
-                return False
+            return model.objects.filter(user=user.pk, recipe=obj.pk).exists()
         return False
 
     def get_is_in_shopping_cart(self, obj):
@@ -294,3 +289,41 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         return UserSubscriberSerializer(
             context=self.context).to_representation(instance.subscription)
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingCart
+        fields = (
+            'user',
+            'recipe',
+        )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=ShoppingCart.objects.all(),
+                fields=('user', 'recipe')
+            ),
+        ]
+
+    def to_representation(self, instance):
+        return RecipeSubscriptionSerializer(
+            context=self.context).to_representation(instance.recipe)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = (
+            'user',
+            'recipe',
+        )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('user', 'recipe')
+            ),
+        ]
+
+    def to_representation(self, instance):
+        return RecipeSubscriptionSerializer(
+            context=self.context).to_representation(instance.recipe)

@@ -170,14 +170,16 @@ class Subscription(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='shoppingcart',
         verbose_name='Пользователь'
     )
-    recipes = models.ManyToManyField(
+    recipe = models.ForeignKey(
         Recipe,
+        on_delete=models.CASCADE,
+        related_name='shoppingusers',
         verbose_name='Рецепты'
     )
 
@@ -187,20 +189,28 @@ class ShoppingCart(models.Model):
         ordering = (
             'user',
         )
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_user_recipe'
+            )
+        ]
 
     def __str__(self) -> str:
-        return f'{self.user.username}: {self.recipes.count()}'
+        return f'{self.user.username}: {self.recipe.name}'
 
 
 class Favorite(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='favorite',
+        related_name='favorites',
         verbose_name='Пользователь'
     )
-    recipes = models.ManyToManyField(
+    recipe = models.ForeignKey(
         Recipe,
+        on_delete=models.CASCADE,
+        related_name='favorings',
         verbose_name='Рецепты'
     )
 
@@ -210,6 +220,12 @@ class Favorite(models.Model):
         ordering = (
             'user',
         )
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_user_recipe'
+            )
+        ]
 
     def __str__(self) -> str:
-        return f'{self.user.username}: {self.recipes.count()}'
+        return f'{self.user.username}: {self.recipe.name}'

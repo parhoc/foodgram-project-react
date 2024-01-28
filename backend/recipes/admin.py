@@ -92,9 +92,11 @@ class SubscriptionAdmin(admin.ModelAdmin):
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = (
         'user',
+        'recipe',
     )
     search_fields = (
         'user',
+        'recipe',
     )
 
 
@@ -102,7 +104,9 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = (
         'user',
+        'recipe',
     )
     search_fields = (
         'user',
+        'recipe',
     )
