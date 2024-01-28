@@ -223,7 +223,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context=self.context).to_representation(instance)
 
 
-class RecipeSubscriptionSerializer(serializers.ModelSerializer):
+class RecipeSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
@@ -236,7 +236,7 @@ class RecipeSubscriptionSerializer(serializers.ModelSerializer):
 
 class UserSubscriberSerializer(CustomUserSerializer):
     recipes_count = serializers.SerializerMethodField(read_only=True)
-    recipes = RecipeSubscriptionSerializer(many=True, read_only=True)
+    recipes = RecipeSimpleSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -306,7 +306,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return RecipeSubscriptionSerializer(
+        return RecipeSimpleSerializer(
             context=self.context).to_representation(instance.recipe)
 
 
@@ -325,5 +325,5 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return RecipeSubscriptionSerializer(
+        return RecipeSimpleSerializer(
             context=self.context).to_representation(instance.recipe)
