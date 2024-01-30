@@ -1,12 +1,11 @@
-import re
-
 from django.contrib.auth import get_user_model
-from django.http import Http404
+from django.http import FileResponse, Http404
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from . import utils
 from .permissions import IsAuthorAdminOrReadOnly
 from .serializers import (
     CustomUserSerializer,
@@ -23,6 +22,7 @@ from recipes.models import (
     Favorite,
     Ingredient,
     Recipe,
+    RecipeIngredient,
     Subscription,
     ShoppingCart,
     Tag,
@@ -139,7 +139,6 @@ class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 class RecipeViewSet(viewsets.ModelViewSet):
     ADD_ERROR_MESSAGE = 'Recipe already in the {}.'
     REMOVE_ERROR_MESSAGE = 'Recipe is not in the {}.'
-    split_regex = re.compile('(?<=.)(?=[A-Z])')
     queryset = Recipe.objects.all()
     http_method_names = [
         'get',
@@ -170,11 +169,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
-    def class_name(self, name):
-        return ' '.join(re.split(self.split_regex, name))
-
     def error_message(self, method, model):
-        class_name = self.class_name(model.__name__)
+        class_name = utils.class_name(model.__name__)
         if method == 'POST':
             return self.ADD_ERROR_MESSAGE.format(class_name)
         return self.REMOVE_ERROR_MESSAGE.format(class_name)
@@ -231,3 +227,34 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.add_to(request.user)
         if request.method == 'DELETE':
             return self.remove_from(request.user, Favorite)
+
+    def get_ingredients(self):
+        recipes = self.request.user.shoppingcart.values_list(
+            'recipe__pk',
+            flat=True
+        )
+        ingredients_amount = RecipeIngredient.objects.filter(
+            recipe__in=recipes).all()
+        ingredients = dict()
+        for ingredient in ingredients_amount:
+            pk = ingredient.ingredient.pk
+            if pk in ingredients:
+                ingredients[pk]['amount'] += ingredient.amount
+            else:
+                ingredients[pk] = {
+                    'name': ingredient.ingredient.name,
+                    'amount': ingredient.amount,
+                    'measurement_unit': ingredient.ingredient.measurement_unit,
+                }
+        return ingredients
+
+    @action(
+        ['get'],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def download_shopping_cart(self, request):
+        ingredients = self.get_ingredients()
+        pdf_buffer = utils.get_pdf(ingredients)
+        return FileResponse(
+            pdf_buffer, as_attachment=True, filename='shoppinglist.pdf')
