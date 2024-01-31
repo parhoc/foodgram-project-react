@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import utils
+from .filters import RecipeFilter
 from .permissions import IsAuthorAdminOrReadOnly
 from .serializers import (
     CustomUserSerializer,
@@ -156,10 +157,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (
         DjangoFilterBackend,
     )
-    filterset_fields = (
-        'author',
-        'tags',
-    )
+    filterset_class = RecipeFilter
 
     def filter_queryset_param(self, queryset, query_param, model):
         user = self.request.user
