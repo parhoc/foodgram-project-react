@@ -92,12 +92,16 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         related_name='recipes'
     )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = (
-            'name',
+            '-pub_date',
         )
 
     def __str__(self) -> str:

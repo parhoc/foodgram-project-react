@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import FileResponse, Http404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -139,7 +140,6 @@ class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 class RecipeViewSet(viewsets.ModelViewSet):
     ADD_ERROR_MESSAGE = 'Recipe already in the {}.'
     REMOVE_ERROR_MESSAGE = 'Recipe is not in the {}.'
-    queryset = Recipe.objects.all()
     http_method_names = [
         'get',
         'post',
@@ -153,6 +153,44 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly,
         IsAuthorAdminOrReadOnly,
     )
+    filter_backends = (
+        DjangoFilterBackend,
+    )
+    filterset_fields = (
+        'author',
+        'tags',
+    )
+
+    def filter_queryset_param(self, queryset, query_param, model):
+        user = self.request.user
+        filter_queryset = model.objects.filter(user=user).values_list(
+            'recipe__pk',
+            flat=True
+        )
+        if query_param == '1':
+            queryset = queryset.filter(pk__in=filter_queryset)
+        elif query_param == '0':
+            queryset = queryset.exclude(pk__in=filter_queryset)
+        return queryset
+
+    def get_queryset(self):
+        queryset = Recipe.objects.all()
+        is_favorited = self.request.query_params.get('is_favorited')
+        if is_favorited is not None:
+            queryset = self.filter_queryset_param(
+                queryset,
+                is_favorited,
+                Favorite
+            )
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart')
+        if is_in_shopping_cart is not None:
+            queryset = self.filter_queryset_param(
+                queryset,
+                is_in_shopping_cart,
+                ShoppingCart
+            )
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
