@@ -34,11 +34,16 @@ class IngredientAdmin(admin.ModelAdmin):
         'measurement_unit',
     )
     list_filter = (
-        'measurement_unit',
+        'name',
     )
     search_fields = (
         'name',
     )
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 0
 
 
 @admin.register(Recipe)
@@ -58,6 +63,16 @@ class RecipeAdmin(admin.ModelAdmin):
     filter_horizontal = (
         'ingredients',
     )
+    inlines = (
+        RecipeIngredientInline,
+    )
+    readonly_fields = (
+        'favorites_count',
+    )
+
+    @admin.display(description='Избранное')
+    def favorites_count(self, instance):
+        return instance.favorings.count()
 
 
 @admin.register(RecipeIngredient)

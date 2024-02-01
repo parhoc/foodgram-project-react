@@ -3,4 +3,10 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import CustomUser
 
-admin.site.register(CustomUser, UserAdmin)
+
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    list_filter = (
+        'username',
+        'email',
+    )
