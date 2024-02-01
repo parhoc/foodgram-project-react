@@ -223,6 +223,19 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             context=self.context).to_representation(instance)
 
 
+class LimitedListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        recipes_limit = self.context['request'].query_params.get(
+            'recipes_limit')
+        if recipes_limit is not None:
+            try:
+                recipes_limit = int(recipes_limit)
+                data = data.all()[:recipes_limit]
+            except ValueError:
+                pass
+        return super().to_representation(data)
+
+
 class RecipeSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
@@ -232,6 +245,7 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         )
+        list_serializer_class = LimitedListSerializer
 
 
 class UserSubscriberSerializer(CustomUserSerializer):
