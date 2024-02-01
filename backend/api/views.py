@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from . import utils
-from .filters import RecipeFilter
+from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorAdminOrReadOnly
 from .serializers import (
     CustomUserSerializer,
@@ -136,6 +136,10 @@ class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
+    filter_backends = (
+        DjangoFilterBackend,
+    )
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
