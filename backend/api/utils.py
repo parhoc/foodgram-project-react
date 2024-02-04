@@ -16,6 +16,7 @@ FONT_FILE = 'fonts/arialnova_light.ttf'
 
 
 def save_pdf(file, document):
+    """Save document object to given file."""
     AnyObjectTransformer().transform(
         object_to_transform=document,
         context=WriteTransformerState(
@@ -27,6 +28,26 @@ def save_pdf(file, document):
 
 
 def get_pdf(ingredients, format_string=None, font_path=None):
+    """
+    Construct PDF file with ingredients list.
+
+    Parameters
+    ----------
+    ingredients : dict
+        Dictionary with ingredients ids.
+        Dictionary items must have the same parameters as `format_string`.
+    format_string : str
+        Format string to represent ingredients as text list items.
+        By default '{name} ({measurement_unit}) - {amount}'.
+    font_path : Path
+        Path to ttf file. By default uses arialnova_light font from app
+        static/fonts. Standart PDF fonts can't display cirilyc latters.
+
+    Returns
+    -------
+    BytesIO
+        Buffer with PDF file.
+    """
     if format_string is None:
         format_string = FORMAT_STRING
     if font_path is None:
@@ -56,4 +77,5 @@ def get_pdf(ingredients, format_string=None, font_path=None):
 
 
 def class_name(name):
+    """Split class name by capital latters."""
     return ' '.join(re.split(SPLIT_REGEX, name))

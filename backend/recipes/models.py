@@ -8,6 +8,15 @@ User = get_user_model()
 
 
 class Tag(models.Model):
+    """
+    Recipe tag model.
+
+    Fields:
+    * name (Char(200));
+    * color (Char(7)) - tag hex color mark;
+    * slug (Slug).
+    """
+
     HEX_COLOR_REGEX = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     name = models.CharField(
         verbose_name='Название',
@@ -37,6 +46,14 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """
+    Recipe ingredient model.
+
+    Fields:
+    * name (Char(200));
+    * measurement_unit (Char(200)).
+    """
+
     name = models.CharField(
         verbose_name='Название',
         max_length=200
@@ -58,6 +75,20 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    """
+    Recipe model.
+
+    Fields:
+    * name (Char(200));
+    * text (Text) - recipe description;
+    * ingredients - ManyToMany connection to Ingredient model;
+    * tags - ManyToMany connection to Tag model;
+    * image (Image);
+    * cooking_time (Int);
+    * author (Int) - FK to User model, cascade on delete;
+    * pub_date (DateTime) - Recipe creation date, auto now.
+    """
+
     name = models.CharField(
         verbose_name='Название',
         max_length=200
@@ -109,6 +140,15 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
+    """
+    ManyToMany support model for Recipe and Ingredient models.
+
+    Fields:
+    * recipe (Int) - FK to Recipe model, cascade on delete;
+    * ingredient (Int) - FK to Ingredient model, cascade on delete;
+    * amount (Int) - ingredient amount in recipe, minimum 1.
+    """
+
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -141,6 +181,8 @@ class Subscription(models.Model):
     Fields:
     * user (Int) - FK to user, cascade on delete;
     * subscription (Int) - FK to other user, cascade on delete.
+
+    User and subscription pair must be unique.
     """
 
     user = models.ForeignKey(
@@ -174,6 +216,16 @@ class Subscription(models.Model):
 
 
 class ShoppingCart(models.Model):
+    """
+    Shopping cart model.
+
+    Fields:
+    * user (Int) - FK to User, cascade on delete;
+    * recipe (Int) - FK to Recipe, cascade on delete.
+
+    User and recipe pair must be unique.
+    """
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -205,6 +257,16 @@ class ShoppingCart(models.Model):
 
 
 class Favorite(models.Model):
+    """
+    Favorite user recipes model.
+
+    Fields:
+    * user (Int) - FK to User, cascade on delete;
+    * recipe (Int) - FK to Recipe, cascade on delete.
+
+    User and recipe pair must be unique.
+    """
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

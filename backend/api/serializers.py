@@ -17,6 +17,19 @@ User = get_user_model()
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
+    """
+    User model serializer.
+
+    Include fields:
+    * email;
+    * id (read only);
+    * username;
+    * first_name;
+    * last_name;
+    * is_subscribed (read only) - custom field, if current user
+    subscribed on specified user.
+    """
+
     is_subscribed = serializers.SerializerMethodField(
         read_only=True
     )
@@ -40,6 +53,18 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class CustomUserCreateSerializer(serializers.ModelSerializer):
+    """
+    User model create serializer.
+
+    Include fields:
+    * email;
+    * id (read only);
+    * username;
+    * first_name;
+    * last_name;
+    * password (write only).
+    """
+
     password = serializers.CharField(
         write_only=True
     )
@@ -63,6 +88,16 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """
+    Tag model serializer.
+
+    Include fields:
+    * id (read only);
+    * name;
+    * color;
+    * slug.
+    """
+
     class Meta:
         model = Tag
         fields = (
@@ -78,6 +113,15 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """
+    Ingredient model serializer.
+
+    Include fields:
+    * id (read only);
+    * name;
+    * measurement_unit.
+    """
+
     class Meta:
         model = Ingredient
         fields = (
@@ -88,6 +132,16 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
+    """
+    RecipeIngredient model serializer.
+
+    Include fields:
+    * id (read only) - ingredient id;
+    * name - ingredient name;
+    * measurement_unit - ingredient measurement unit;
+    * amount.
+    """
+
     id = serializers.SerializerMethodField(read_only=True)
     name = serializers.SerializerMethodField(read_only=True)
     measurement_unit = serializers.SerializerMethodField(read_only=True)
@@ -112,6 +166,14 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
+    """
+    RecipeIngredient model create serializer.
+
+    Include fields:
+    * id (read only) - ingredient id;
+    * amount.
+    """
+
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all()
     )
@@ -125,6 +187,24 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """
+    Recipe model serializer.
+
+    Include fields:
+    * id (read only);
+    * tags - `TagSerializer`, many;
+    * author (read only);
+    * ingredients - `RecipeIngredientSerializer`, many;
+    * is_favorited (read only) - custom field, if specified recipe in
+    user's favorites;
+    * is_in_shopping_cart (read only) - custom field, if specified recipe in
+    user's shopping cart;
+    * name;
+    * image - coded in base64;
+    * text;
+    * cooking_time.
+    """
+
     author = CustomUserSerializer(read_only=True)
     tags = TagSerializer(many=True)
     ingredients = RecipeIngredientSerializer(
@@ -154,7 +234,10 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def is_in(self, obj, model):
+    def is_in(self, obj, model) -> bool:
+        """
+        Checks if `obj` in `model` for current user.
+        """
         user = self.context['request'].user
         if user.is_authenticated:
             return model.objects.filter(user=user.pk, recipe=obj.pk).exists()
@@ -168,6 +251,18 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
+    """
+    Recipe model create serializer.
+
+    Include fields:
+    * ingredients - `RecipeIngredientSerializer`, many;
+    * tags - `TagSerializer`, many;
+    * image - coded in base64;
+    * name;
+    * text;
+    * cooking_time.
+    """
+
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
@@ -194,6 +289,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('recipeingredient_set')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
+        # create records in RecipeIngredient table
         for ingredient_recipe in ingredients:
             RecipeIngredient.objects.create(
                 recipe=recipe,
@@ -206,6 +302,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipeingredient_set')
         instance.tags.set(tags)
+        # replace recipe ingredients
         RecipeIngredient.objects.filter(recipe=instance).delete()
         for ingredient_recipe in ingredients:
             RecipeIngredient.objects.create(
@@ -213,6 +310,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
                 ingredient=ingredient_recipe['id'],
                 amount=ingredient_recipe['amount']
             )
+        # add other attributes
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
@@ -224,6 +322,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
 
 class LimitedListSerializer(serializers.ListSerializer):
+    """
+    ListSerializer with limited number of return values.
+
+    Number of return values limited by `recipe_limit` query parameter.
+    """
+
     def to_representation(self, data):
         recipes_limit = self.context['request'].query_params.get(
             'recipes_limit')
@@ -237,6 +341,16 @@ class LimitedListSerializer(serializers.ListSerializer):
 
 
 class RecipeSimpleSerializer(serializers.ModelSerializer):
+    """
+    Recipe model serializer with fewer fields.
+
+    Include fields:
+    * id (read only);
+    * name;
+    * image;
+    * cooking_time.
+    """
+
     class Meta:
         model = Recipe
         fields = (
@@ -249,6 +363,21 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
 
 
 class UserSubscriberSerializer(CustomUserSerializer):
+    """
+    User model serializer for subscription response.
+
+    Include fields:
+    * email;
+    * id (read only);
+    * username;
+    * first_name;
+    * last_name;
+    * is_subscribed (read only) - custom field, if current user
+    subscribed on specified user.
+    * recipes (read only) - user recipes, many;
+    * recipes_count (read only) - custom field.
+    """
+
     recipes_count = serializers.SerializerMethodField(read_only=True)
     recipes = RecipeSimpleSerializer(many=True, read_only=True)
 
@@ -270,6 +399,16 @@ class UserSubscriberSerializer(CustomUserSerializer):
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Subscription model serializer.
+
+    Include fields:
+    * user;
+    * subscription.
+
+    User and subscription pair must be unique.
+    """
+
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all()
     )
@@ -306,6 +445,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
+    """
+    ShoppingCart model serializer.
+
+    Include fields:
+    * user;
+    * recipe.
+
+    User and recipe pair must be unique.
+    """
+
     class Meta:
         model = ShoppingCart
         fields = (
@@ -325,6 +474,16 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
+    """
+    ShoppingCart model serializer.
+
+    Include fields:
+    * user;
+    * recipe.
+
+    User and recipe pair must be unique.
+    """
+
     class Meta:
         model = Favorite
         fields = (

@@ -13,6 +13,7 @@ from .models import (
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
+    """Tag admin model."""
     list_display = (
         'name',
         'color',
@@ -29,6 +30,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
+    """Ingredient admin model."""
     list_display = (
         'name',
         'measurement_unit',
@@ -48,6 +50,7 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
+    """Recipe admin model."""
     list_display = (
         'name',
         'author',
@@ -77,6 +80,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
+    """RecipeIngredient admin model."""
     list_display = (
         'recipe',
         'ingredient',
@@ -94,6 +98,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
+    """Subscription admin model."""
     list_display = (
         'user',
         'subscription',
@@ -105,6 +110,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
+    """ShoppingCart admin model."""
     list_display = (
         'user',
         'recipe',
@@ -117,6 +123,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
+    """Favorites admin model."""
     list_display = (
         'user',
         'recipe',
@@ -125,3 +132,8 @@ class FavoriteAdmin(admin.ModelAdmin):
         'user',
         'recipe',
     )
+
+
+admin.site.empty_value_display = 'Не задано'
+admin.site.site_title = 'Администирирование Фудграм'
+admin.site.site_header = 'Администирирование Фудграм'

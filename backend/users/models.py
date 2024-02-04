@@ -3,6 +3,16 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
+    """
+    Custom user model.
+
+    Inherits all fields from AbstractUser except:
+    * email Char(254);
+    * username Char(150);
+    * first_name Char(150);
+    * last_name Char(150).
+    """
+
     email = models.EmailField(
         max_length=254,
         verbose_name='Электронная почта',

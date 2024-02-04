@@ -6,6 +6,10 @@ from .models import CustomUser
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
+    '''
+    CustomUser admin model.
+    '''
+
     list_filter = (
         'username',
         'email',
