@@ -33,4 +33,3 @@ services:
       - static:/static
       - media:/media
       - ./infra/nginx.conf:/etc/nginx/templates/default.conf.template
-      - ./frontend/build:/usr/share/nginx/html/
