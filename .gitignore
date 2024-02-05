@@ -137,3 +137,6 @@ backend/media/
 
 # Static
 *.ttf
+
+# DB data
+data/
