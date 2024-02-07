@@ -15,6 +15,12 @@
 ```
 docker compose -f docker-compose.production.yml up
 ```
+В другом терминале ввести команды:
+```
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+```
 Сайт будет доступен по адресу `127.0.0.1:8000`.
 ## Возможности проекта
 ### Рецепты
