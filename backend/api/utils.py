@@ -1,7 +1,7 @@
-from decimal import Decimal
 import io
-from pathlib import Path
 import re
+from decimal import Decimal
+from pathlib import Path
 
 from borb import pdf
 from borb.io.write.any_object_transformer import AnyObjectTransformer
