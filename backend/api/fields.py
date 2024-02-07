@@ -26,3 +26,11 @@ class Base64ImageField(serializers.ImageField):
         extension = imghdr.what(file_name, decoded_file)
         extension = "jpg" if extension == "jpeg" else extension
         return extension
+
+    def to_representation(self, value):
+        if not value:
+            return None
+        try:
+            return value.url
+        except AttributeError:
+            return None
