@@ -1,17 +1,10 @@
 from django.contrib.auth import get_user_model
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Subscription, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import Base64ImageField
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    ShoppingCart,
-    Subscription,
-    Tag
-)
 
 User = get_user_model()
 

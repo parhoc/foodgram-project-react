@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.http import FileResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.serializers import SetPasswordSerializer
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Subscription, Tag)
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,26 +11,11 @@ from rest_framework.response import Response
 from . import utils
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorAdminOrReadOnly
-from .serializers import (
-    CustomUserSerializer,
-    CustomUserCreateSerializer,
-    FavoriteSerializer,
-    IngredientSerializer,
-    RecipeSerializer,
-    RecipeCreateSerializer,
-    ShoppingCartSerializer,
-    SubscriptionSerializer,
-    TagSerializer,
-)
-from recipes.models import (
-    Favorite,
-    Ingredient,
-    Recipe,
-    RecipeIngredient,
-    Subscription,
-    ShoppingCart,
-    Tag,
-)
+from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
+                          FavoriteSerializer, IngredientSerializer,
+                          RecipeCreateSerializer, RecipeSerializer,
+                          ShoppingCartSerializer, SubscriptionSerializer,
+                          TagSerializer)
 
 User = get_user_model()
 
