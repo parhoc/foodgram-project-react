@@ -20,16 +20,15 @@ services:
       - static:/backend_static
       - media:/app/media
   frontend:
-    env_file: .env
     build: ./frontend/
+    env_file: .env
     volumes:
       - static:/app/result_build
   gateway:
-    image: nginx:1.19.3
+    build: ./infra/
     env_file: .env
     ports:
       - 8000:80
     volumes:
       - static:/static
       - media:/media
-      - ./infra/nginx.conf:/etc/nginx/templates/default.conf.template
