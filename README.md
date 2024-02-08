@@ -5,10 +5,11 @@
 ## Доступ к сайту
 Сайт: https://foodgram.viewdns.net
 
-Логин: Foodlover
+Email: foodgram@foodgram.com
 
 Пароль: foodgram5533
 ## Установка
+### Через Docker hub
 Скачать файл ``docker-compose.production.yml``
 
 В директории с файлом запустить:
@@ -20,6 +21,22 @@ docker compose -f docker-compose.production.yml up
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
+```
+Сайт будет доступен по адресу `127.0.0.1:8000`.
+### Локальная установка
+Клонировать рапозиторий:
+```
+git clone https://github.com/parhoc/foodgram-project-react.git
+```
+В папке с проектом запустить Docker compose:
+```
+docker compose up
+```
+В другом терминале ввести команды:
+```
+sudo docker compose exec backend python manage.py migrate
+sudo docker compose exec backend python manage.py collectstatic
+sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
 Сайт будет доступен по адресу `127.0.0.1:8000`.
 ## Возможности проекта
