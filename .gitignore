@@ -135,8 +135,5 @@ dmypy.json
 backend/recipes/images/
 backend/media/
 
-# Static
-*.ttf
-
 # DB data
 data/
