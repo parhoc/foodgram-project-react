@@ -313,6 +313,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         return RecipeSerializer(
             context=self.context).to_representation(instance)
 
+    def validate_ingredients(self, value):
+        ingredients = set(ingredisnt.get('id') for ingredisnt in value)
+        print(ingredients)
+        if len(set(ingredients)) != len(value):
+            error_msg = {'error': 'All ingredients must be unique'}
+            raise serializers.ValidationError(error_msg)
+        return value
+
 
 class LimitedListSerializer(serializers.ListSerializer):
     """

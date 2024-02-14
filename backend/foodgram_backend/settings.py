@@ -3,11 +3,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'key')
 
 DEBUG = os.getenv('DEBUG', True)
 
-ALLOWED_HOSTS = os.getenv('HOST').split()
+ALLOWED_HOSTS = os.getenv('HOST', '127.0.0.1').split()
 
 
 INSTALLED_APPS = [
@@ -70,7 +70,7 @@ if os.getenv('ENGINE'):
         }
     }
 else:
-    DATABASE = {
+    DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
