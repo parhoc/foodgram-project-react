@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from foodgram_backend import constants
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Subscription, Tag)
 from rest_framework import serializers
@@ -78,6 +79,14 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def validate_username(self, value):
+        if value in constants.INVALID_USERNAMES:
+            error_msg = {
+                'error': f"You can't create user with '{value}' username.",
+            }
+            raise serializers.ValidationError(error_msg)
+        return value
 
 
 class TagSerializer(serializers.ModelSerializer):
