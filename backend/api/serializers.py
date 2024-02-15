@@ -25,9 +25,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     subscribed on specified user.
     """
 
-    is_subscribed = serializers.SerializerMethodField(
-        read_only=True
-    )
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -145,9 +143,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     * amount.
     """
 
-    id = serializers.SerializerMethodField(read_only=True)
-    name = serializers.SerializerMethodField(read_only=True)
-    measurement_unit = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipeIngredient
@@ -218,9 +216,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField(
         read_only=True
     )
-    is_favorited = serializers.SerializerMethodField(
-        read_only=True
-    )
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -237,7 +233,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def is_in(self, obj, model) -> bool:
+    def __is_in(self, obj, model) -> bool:
         """
         Checks if `obj` in `model` for current user.
         """
@@ -247,10 +243,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        return self.is_in(obj, ShoppingCart)
+        return self.__is_in(obj, ShoppingCart)
 
     def get_is_favorited(self, obj):
-        return self.is_in(obj, Favorite)
+        return self.__is_in(obj, Favorite)
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -287,37 +283,30 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def create(self, validated_data):
-        tags = validated_data.pop('tags')
-        ingredients = validated_data.pop('recipeingredient_set')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-        # create records in RecipeIngredient table
+    def create_recipe_ingredients(self, recipe, ingredients):
+        """Creates records in RecipeIngredient table."""
         for ingredient_recipe in ingredients:
             RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient_recipe['id'],
                 amount=ingredient_recipe['amount']
             )
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('recipeingredient_set')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.create_recipe_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipeingredient_set')
         instance.tags.set(tags)
-        # replace recipe ingredients
-        RecipeIngredient.objects.filter(recipe=instance).delete()
-        for ingredient_recipe in ingredients:
-            RecipeIngredient.objects.create(
-                recipe=instance,
-                ingredient=ingredient_recipe['id'],
-                amount=ingredient_recipe['amount']
-            )
-        # add other attributes
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        return instance
+        instance.ingredients.clear()
+        self.create_recipe_ingredients(instance, ingredients)
+        return super().update(instance, validated_data)
 
     def to_representation(self, instance):
         return RecipeSerializer(
@@ -389,7 +378,7 @@ class UserSubscriberSerializer(CustomUserSerializer):
     * recipes_count (read only) - custom field.
     """
 
-    recipes_count = serializers.SerializerMethodField(read_only=True)
+    recipes_count = serializers.SerializerMethodField()
     recipes = RecipeSimpleSerializer(many=True, read_only=True)
 
     class Meta:
