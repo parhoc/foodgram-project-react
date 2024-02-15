@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                     ShoppingCart, Subscription, Tag)
+                     ShoppingCart, Tag)
 
 
 @admin.register(Tag)
@@ -86,18 +86,6 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
     search_fields = (
         'recipe',
         'ingredient'
-    )
-
-
-@admin.register(Subscription)
-class SubscriptionAdmin(admin.ModelAdmin):
-    """Subscription admin model."""
-    list_display = (
-        'user',
-        'subscription',
-    )
-    search_fields = (
-        'user',
     )
 
 

@@ -1,8 +1,7 @@
-import re
-
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+from foodgram_backend import constants
 
 User = get_user_model()
 
@@ -17,16 +16,15 @@ class Tag(models.Model):
     * slug (Slug).
     """
 
-    HEX_COLOR_REGEX = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
     name = models.CharField(
         verbose_name='Название',
-        max_length=200
+        max_length=constants.NAME_MAX_LENGTH
     )
     color = models.CharField(
         verbose_name='Цвет',
-        max_length=7,
+        max_length=constants.HEX_COLOR_LENGTH,
         validators=(
-            RegexValidator(HEX_COLOR_REGEX),
+            RegexValidator(constants.HEX_COLOR_REGEX),
         )
     )
     slug = models.SlugField(
@@ -56,11 +54,11 @@ class Ingredient(models.Model):
 
     name = models.CharField(
         verbose_name='Название',
-        max_length=200
+        max_length=constants.NAME_MAX_LENGTH
     )
     measurement_unit = models.CharField(
         verbose_name='Единицы измерения',
-        max_length=200
+        max_length=constants.NAME_MAX_LENGTH
     )
 
     class Meta:
@@ -91,7 +89,7 @@ class Recipe(models.Model):
 
     name = models.CharField(
         verbose_name='Название',
-        max_length=200
+        max_length=constants.NAME_MAX_LENGTH
     )
     text = models.TextField(
         verbose_name='Описание'
@@ -114,7 +112,10 @@ class Recipe(models.Model):
     cooking_time = models.IntegerField(
         verbose_name='Время приготовления, мин',
         validators=(
-            MinValueValidator(1),
+            MinValueValidator(
+                1,
+                'Время приготовления должно быть не меньше 1'
+            ),
         )
     )
     author = models.ForeignKey(
@@ -162,7 +163,10 @@ class RecipeIngredient(models.Model):
     amount = models.IntegerField(
         verbose_name='Количество',
         validators=(
-            MinValueValidator(1),
+            MinValueValidator(
+                1,
+                'Количество должно быть не меньше 1'
+            ),
         )
     )
 
@@ -178,47 +182,6 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} {self.amount}'
-
-
-class Subscription(models.Model):
-    """
-    User subscription model.
-
-    Fields:
-    * user (Int) - FK to user, cascade on delete;
-    * subscription (Int) - FK to other user, cascade on delete.
-
-    User and subscription pair must be unique.
-    """
-
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscriptions',
-        verbose_name='Пользователь'
-    )
-    subscription = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='subscribers',
-        verbose_name='Подписки'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'subscription'],
-                name='unique_user_subscription'
-            )
-        ]
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        ordering = (
-            'user',
-        )
-
-    def __str__(self):
-        return f'{self.user.username} -> {self.subscription.username}'
 
 
 class ShoppingCart(models.Model):

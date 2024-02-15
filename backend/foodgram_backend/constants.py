@@ -1,5 +1,10 @@
+import re
+
 INVALID_USERNAMES = (
     'me',
 )
 EMAIL_MAX_LENGTH = 254
 CHAR_FIELD_MAX_LENGTH = 150
+HEX_COLOR_REGEX = re.compile(r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
+NAME_MAX_LENGTH = 200
+HEX_COLOR_LENGTH = 7
