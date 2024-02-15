@@ -1,17 +1,28 @@
-from api import utils
-from api.permissions import IsAuthorAdminOrReadOnly
-from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipeCreateSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, TagSerializer)
 from django.http import FileResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .filters import IngredientFilter, RecipeFilter
+from api import utils
+from api.permissions import IsAuthorAdminOrReadOnly
+from api.serializers import (
+    FavoriteSerializer,
+    IngredientSerializer,
+    RecipeCreateSerializer,
+    RecipeSerializer,
+    ShoppingCartSerializer,
+    TagSerializer,
+)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
 
 
 class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,

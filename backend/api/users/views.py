@@ -1,10 +1,14 @@
-from api.serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                             SubscriptionSerializer)
 from django.contrib.auth import get_user_model
 from djoser.serializers import SetPasswordSerializer
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from api.serializers import (
+    CustomUserCreateSerializer,
+    CustomUserSerializer,
+    SubscriptionSerializer,
+)
 from users.models import Subscription
 
 User = get_user_model()

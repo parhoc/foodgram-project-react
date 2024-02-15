@@ -1,12 +1,18 @@
 from django.contrib.auth import get_user_model
-from foodgram_backend import constants
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from users.models import Subscription
 
 from .fields import Base64ImageField
+from foodgram_backend import constants
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    Recipe,
+    RecipeIngredient,
+    ShoppingCart,
+    Tag,
+)
+from users.models import Subscription
 
 User = get_user_model()
 
