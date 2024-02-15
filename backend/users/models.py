@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from foodgram_backend import constants
 
+from .validators import validate_username
+
 
 class CustomUser(AbstractUser):
     """
@@ -23,6 +25,9 @@ class CustomUser(AbstractUser):
         max_length=constants.CHAR_FIELD_MAX_LENGTH,
         verbose_name='Логин',
         unique=True,
+        validators=(
+            validate_username,
+        )
     )
     first_name = models.CharField(
         max_length=constants.CHAR_FIELD_MAX_LENGTH,
@@ -43,9 +48,3 @@ class CustomUser(AbstractUser):
         ordering = (
             'username',
         )
-        constraints = [
-            models.CheckConstraint(
-                check=~models.Q(username__in=constants.INVALID_USERNAMES),
-                name='invalid_username'
-            ),
-        ]
