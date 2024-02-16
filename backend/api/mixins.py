@@ -2,6 +2,8 @@ from rest_framework.response import Response
 
 
 class PartialUpdateMixin:
+    """Update mixin without PUT method."""
+
     def partial_update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(
