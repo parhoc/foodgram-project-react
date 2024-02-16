@@ -4,7 +4,16 @@ from recipes.models import Favorite, Ingredient, Recipe, ShoppingCart, Tag
 
 
 class RecipeFilter(filters.FilterSet):
-    """Filter recipes by tags slug and author."""
+    """
+    Filter for Recipes model.
+
+    FIlter fields:
+    * tags (slug) - can be multiple choices;
+    * author (int) - user pk;
+    * is_favorited (bool) - include/exclude current user favorited recipes;
+    * is_in_shopping_cart (bool) - include/exclude recipes in current user's
+    shopping cart.
+    """
 
     tags = filters.ModelMultipleChoiceFilter(
         to_field_name='slug',
@@ -45,7 +54,7 @@ class RecipeFilter(filters.FilterSet):
 
 
 class IngredientFilter(filters.FilterSet):
-    """Filter ingredients by name."""
+    """Filter ingredients by name from start."""
 
     name = filters.CharFilter(
         lookup_expr='startswith'
