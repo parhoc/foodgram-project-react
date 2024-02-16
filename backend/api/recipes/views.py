@@ -38,8 +38,7 @@ class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     pagination_class = None
 
 
-class IngredientViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Ingredient model ViewSet.
 
