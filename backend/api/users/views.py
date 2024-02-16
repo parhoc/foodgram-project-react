@@ -101,31 +101,8 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         self.request.user.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def create_subscription(self, user, subscription):
-        data = {
-            'user': user.pk,
-            'subscription': subscription.pk,
-        }
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-    def destroy_subscription(self, user, subscription):
-        try:
-            instance = user.subscriptions.get(subscription=subscription)
-        except Subscription.DoesNotExist:
-            return Response(
-                {'errors': 'Subscription does not exist.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     @action(
-        ['post', 'delete'],
+        ['post'],
         detail=True,
         permission_classes=(permissions.IsAuthenticated,)
     )
@@ -136,7 +113,26 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         Post and delete method. Availible only to authenticated users.
         """
         subscription = self.get_object()
-        if request.method == 'POST':
-            return self.create_subscription(request.user, subscription)
-        if request.method == 'DELETE':
-            return self.destroy_subscription(request.user, subscription)
+        data = {
+            'user': request.user.pk,
+            'subscription': subscription.pk,
+        }
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED)
+
+    @subscribe.mapping.delete
+    def delete_subscription(self, request, pk):
+        subscription = self.get_object()
+        try:
+            instance = request.user.subscriptions.get(
+                subscription=subscription)
+        except Subscription.DoesNotExist:
+            return Response(
+                {'errors': 'Subscription does not exist.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
