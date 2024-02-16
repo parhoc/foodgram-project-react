@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from .filters import IngredientFilter, RecipeFilter
 from api import utils
+from api.mixins import PartialUpdateMixin
 from api.permissions import IsAuthorAdminOrReadOnly
 from api.serializers import (
     FavoriteSerializer,
@@ -25,8 +26,7 @@ from recipes.models import (
 )
 
 
-class TagViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                 viewsets.GenericViewSet):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Tag model ViewSet.
 
@@ -54,7 +54,9 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(viewsets.ModelViewSet):
+class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
+                    mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                    PartialUpdateMixin, viewsets.GenericViewSet):
     """
     Recipe model ViewSet.
 
@@ -71,15 +73,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """
 
     REMOVE_ERROR_MESSAGE = 'Recipe is not in the {}.'
-    http_method_names = [
-        'get',
-        'post',
-        'patch',
-        'delete',
-        'head',
-        'options',
-        'trace'
-    ]
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         IsAuthorAdminOrReadOnly,
