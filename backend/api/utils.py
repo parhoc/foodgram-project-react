@@ -39,7 +39,7 @@ def get_pdf(ingredients, format_string=None, font_path=None):
         `format_string`.
     format_string : str
         Format string to represent ingredients as text list items.
-        By default '{name} ({measurement_unit}) - {amount}'.
+        By default '{name} ({measurement_unit}) - {amount_sum}'.
     font_path : Path
         Path to ttf file. By default uses arialnova_light font from app
         static/fonts. Standart PDF fonts can't display cirilyc latters.
