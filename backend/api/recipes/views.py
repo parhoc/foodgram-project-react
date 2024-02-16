@@ -218,9 +218,10 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         ingredients_amount = RecipeIngredient.objects.filter(
             recipe__in=recipes)
         ingredients_sum = ingredients_amount.values(
-            amount_sum=Sum('amount'),
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')
+        ).annotate(
+            amount_sum=Sum('amount')
         )
         return ingredients_sum
 

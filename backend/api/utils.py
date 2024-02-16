@@ -33,9 +33,10 @@ def get_pdf(ingredients, format_string=None, font_path=None):
 
     Parameters
     ----------
-    ingredients : dict
-        Dictionary with ingredients ids.
-        Dictionary items must have the same parameters as `format_string`.
+    ingredients : iterable
+        List with ingredients dictionaries.
+        Ingredients dictionarys must have the same parameters as
+        `format_string`.
     format_string : str
         Format string to represent ingredients as text list items.
         By default '{name} ({measurement_unit}) - {amount}'.
@@ -64,7 +65,7 @@ def get_pdf(ingredients, format_string=None, font_path=None):
         horizontal_alignment=Alignment.CENTERED
     ))
     pdf_list = pdf.UnorderedList()
-    for ingredient in ingredients.values():
+    for ingredient in ingredients:
         pdf_list.add(pdf.Paragraph(
             format_string.format(**ingredient),
             font=custom_font
