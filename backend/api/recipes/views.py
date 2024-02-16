@@ -1,3 +1,4 @@
+from django.db.models import F, Sum
 from django.http import FileResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, status, viewsets
@@ -208,26 +209,20 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         """
         Return shopping cart recipes ingredients as dictionary.
 
-        Summ amounts of the same ingredients.
+        Sum amounts of the same ingredients.
         """
         recipes = self.request.user.shoppingcart.values_list(
             'recipe__pk',
             flat=True
         )
         ingredients_amount = RecipeIngredient.objects.filter(
-            recipe__in=recipes).all()
-        ingredients = dict()
-        for ingredient in ingredients_amount:
-            pk = ingredient.ingredient.pk
-            if pk in ingredients:
-                ingredients[pk]['amount'] += ingredient.amount
-            else:
-                ingredients[pk] = {
-                    'name': ingredient.ingredient.name,
-                    'amount': ingredient.amount,
-                    'measurement_unit': ingredient.ingredient.measurement_unit,
-                }
-        return ingredients
+            recipe__in=recipes)
+        ingredients_sum = ingredients_amount.values(
+            amount_sum=Sum('amount'),
+            name=F('ingredient__name'),
+            measurement_unit=F('ingredient__measurement_unit')
+        )
+        return ingredients_sum
 
     @action(
         ['get'],

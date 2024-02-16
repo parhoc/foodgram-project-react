@@ -10,7 +10,7 @@ from borb.pdf import Alignment
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
 from django.contrib.staticfiles import finders
 
-FORMAT_STRING = '{name} ({measurement_unit}) - {amount}'
+FORMAT_STRING = '{name} ({measurement_unit}) - {amount_sum}'
 SPLIT_REGEX = re.compile('(?<=.)(?=[A-Z])')
 FONT_FILE = 'fonts/arialnova_light.ttf'
 
