@@ -174,7 +174,7 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        ['post', 'delete'],
+        ['post'],
         detail=True,
         permission_classes=(permissions.IsAuthenticated,)
     )
@@ -184,13 +184,14 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
         Post and delete method. Availible only to authenticated users.
         """
-        if request.method == 'POST':
-            return self.add_to(request.user)
-        if request.method == 'DELETE':
-            return self.remove_from(request.user, ShoppingCart)
+        return self.add_to(request.user)
+
+    @shopping_cart.mapping.delete
+    def remove_from_shopping_cart(self, request, pk):
+        return self.remove_from(request.user, ShoppingCart)
 
     @action(
-        ['post', 'delete'],
+        ['post'],
         detail=True,
         permission_classes=(permissions.IsAuthenticated,)
     )
@@ -200,10 +201,11 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
 
         Post and delete method. Availible only to authenticated users.
         """
-        if request.method == 'POST':
-            return self.add_to(request.user)
-        if request.method == 'DELETE':
-            return self.remove_from(request.user, Favorite)
+        return self.add_to(request.user)
+
+    @favorite.mapping.delete
+    def remove_from_favorite(self, request, pk):
+        return self.remove_from(request.user, Favorite)
 
     def get_ingredients(self):
         """
