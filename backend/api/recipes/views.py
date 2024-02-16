@@ -82,43 +82,7 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         DjangoFilterBackend,
     )
     filterset_class = RecipeFilter
-
-    def filter_queryset_param(self, queryset, query_param, model):
-        """
-        Filter given `queryset` from `model` based on `query_param` value.
-
-        `query_param` can be '1' - include or '0' - exclude records from
-        `queryset` that exist in given `model`.
-        """
-        user = self.request.user
-        filter_queryset = model.objects.filter(user=user).values_list(
-            'recipe__pk',
-            flat=True
-        )
-        if query_param == '1':
-            queryset = queryset.filter(pk__in=filter_queryset)
-        elif query_param == '0':
-            queryset = queryset.exclude(pk__in=filter_queryset)
-        return queryset
-
-    def get_queryset(self):
-        queryset = Recipe.objects.all()
-        is_favorited = self.request.query_params.get('is_favorited')
-        if is_favorited is not None:
-            queryset = self.filter_queryset_param(
-                queryset,
-                is_favorited,
-                Favorite
-            )
-        is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart')
-        if is_in_shopping_cart is not None:
-            queryset = self.filter_queryset_param(
-                queryset,
-                is_in_shopping_cart,
-                ShoppingCart
-            )
-        return queryset
+    queryset = Recipe.objects.all()
 
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
