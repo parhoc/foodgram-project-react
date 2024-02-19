@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -46,12 +47,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
-        if user.is_authenticated:
-            return user.subscriptions.filter(subscription=obj).exists()
-        return False
+        return (user.is_authenticated
+                and user.subscriptions.filter(subscription=obj).exists())
 
 
-class CustomUserCreateSerializer(serializers.ModelSerializer):
+class CustomUserCreateSerializer(UserCreateSerializer):
     """
     User model create serializer.
 
@@ -63,27 +63,6 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
     * last_name;
     * password (write only).
     """
-
-    password = serializers.CharField(
-        write_only=True
-    )
-
-    class Meta:
-        model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
-        )
-
-    def create(self, validated_data):
-        user = super().create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
 
     def validate_username(self, value):
         if value in constants.INVALID_USERNAMES:

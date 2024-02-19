@@ -1,21 +1,16 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import SetPasswordSerializer
-from rest_framework import mixins, permissions, status, viewsets
+from djoser.views import UserViewSet
+from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import (
-    CustomUserCreateSerializer,
-    CustomUserSerializer,
-    SubscriptionSerializer,
-)
+from api.serializers import SubscriptionSerializer
 from users.models import Subscription
 
 User = get_user_model()
 
 
-class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
-                        mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+class CustomUserViewSet(UserViewSet):
     """
     User model ViewSet.
 
@@ -23,44 +18,11 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     Methods
     -------
-    me
-        Reference to current user.
     subscriptions
         Current user subscriptions.
-    set_password
-        Change current user password.
     subscribe
         Add or remove subscription to specified user.
     """
-
-    queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-
-    def get_instance(self):
-        return self.request.user
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return CustomUserCreateSerializer
-        if self.action == 'set_password':
-            return SetPasswordSerializer
-        if self.action in ('subscribe', 'subscriptions'):
-            return SubscriptionSerializer
-        return CustomUserSerializer
-
-    @action(
-        ['get'],
-        detail=False,
-        permission_classes=(permissions.IsAuthenticated,)
-    )
-    def me(self, request, *args, **kwargs):
-        """
-        Return response with current authenticated user details.
-
-        Get method. Availible only to authenticated users.
-        """
-        self.get_object = self.get_instance
-        return self.retrieve(request, *args, **kwargs)
 
     @action(
         ['get'],
@@ -75,7 +37,7 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
         """
         queryset = request.user.subscriptions.all()
         page = self.paginate_queryset(queryset)
-        serializer = self.get_serializer(
+        serializer = SubscriptionSerializer(
             page,
             many=True,
             context={
@@ -86,27 +48,10 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
 
     @action(
         ['post'],
-        detail=False,
-        permission_classes=(permissions.IsAuthenticated,)
-    )
-    def set_password(self, request):
-        """
-        Change current authenticated user password.
-
-        Post method. Availible only to authenticated users.
-        """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.request.user.set_password(serializer.data["new_password"])
-        self.request.user.save()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        ['post'],
         detail=True,
         permission_classes=(permissions.IsAuthenticated,)
     )
-    def subscribe(self, request, pk):
+    def subscribe(self, request, id):
         """
         Create or delete subscription for current user to specified user.
 
@@ -117,14 +62,17 @@ class CustomUserViewSet(mixins.CreateModelMixin, mixins.ListModelMixin,
             'user': request.user.pk,
             'subscription': subscription.pk,
         }
-        serializer = self.get_serializer(data=data)
+        serializer = SubscriptionSerializer(
+            data=data,
+            context=self.get_serializer_context()
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
             serializer.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
-    def delete_subscription(self, request, pk):
+    def delete_subscription(self, request, id):
         subscription = self.get_object()
         try:
             instance = request.user.subscriptions.get(
