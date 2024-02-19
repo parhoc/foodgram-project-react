@@ -3,7 +3,7 @@ from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .fields import Base64ImageField
+from .fields import Base64ImageFieldURL
 from foodgram_backend import constants
 from recipes.models import (
     Favorite,
@@ -197,7 +197,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipeingredient_set',
         many=True
     )
-    image = Base64ImageField()
+    image = Base64ImageFieldURL()
     is_in_shopping_cart = serializers.SerializerMethodField(
         read_only=True
     )
@@ -251,7 +251,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         many=True
     )
-    image = Base64ImageField()
+    image = Base64ImageFieldURL()
     ingredients = RecipeIngredientCreateSerializer(
         many=True,
         source='recipeingredient_set'
