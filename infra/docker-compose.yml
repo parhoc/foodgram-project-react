@@ -8,11 +8,10 @@ volumes:
 services:
   db:
     image: postgres:13
-    env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
-    build: ./backend/
+    build: ../backend
     env_file: .env
     depends_on:
       - db
@@ -20,16 +19,16 @@ services:
       - static:/backend_static
       - media:/app/media
   frontend:
-    build: ./frontend/
-    env_file: .env
+    build: ../frontend
     volumes:
       - static:/app/result_build
   gateway:
-    build: ./infra/
-    env_file: .env
+    build:
+      dockerfile: Dockerfile
+      context: .
     ports:
       - 8000:80
     volumes:
       - static:/static
       - media:/media
-      - ./docs/:/usr/share/nginx/html/api/docs/
+      - ../docs/:/usr/share/nginx/html/api/docs/

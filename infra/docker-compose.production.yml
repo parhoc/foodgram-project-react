@@ -8,7 +8,6 @@ volumes:
 services:
   db:
     image: postgres:13
-    env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
@@ -21,15 +20,13 @@ services:
       - media:/app/media
   frontend:
     image: parhoc/foodgram_frontend
-    env_file: .env
     volumes:
       - static:/app/result_build
   gateway:
     image: parhoc/foodgram_gateway
-    env_file: .env
     ports:
       - 8000:80
     volumes:
       - static:/static
       - media:/media
-      - ./docs/:/usr/share/nginx/html/api/docs/
+      - ../docs/:/usr/share/nginx/html/api/docs/
