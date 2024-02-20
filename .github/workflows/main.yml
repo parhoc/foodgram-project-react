@@ -107,8 +107,6 @@ jobs:
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
-      with: 
-        sparse-checkout: infra
     - name: Copy docker-compose.production.yml via ssh
       uses: appleboy/scp-action@master
       with:
@@ -127,6 +125,7 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
           cd foodgram
+          cp infra/docker-compose.production.yml docker-compose.production.yml
           sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml down
           sudo docker compose -f docker-compose.production.yml up -d
