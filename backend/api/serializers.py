@@ -336,6 +336,8 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
     * cooking_time.
     """
 
+    image = Base64ImageFieldURL()
+
     class Meta:
         model = Recipe
         fields = (
