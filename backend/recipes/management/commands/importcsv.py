@@ -15,12 +15,13 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> str | None:
         with open(options['file'][0], 'r') as file:
             reader = csv.reader(file)
-            Ingredient.objects.bulk_create(
-                Ingredient(name=row[0], measurement_unit=row[1])
-                for row in reader
+            created = Ingredient.objects.bulk_create(
+                [Ingredient(name=row[0], measurement_unit=row[1])
+                 for row in reader],
+                ignore_conflicts=True
             )
         self.stdout.write(
             self.style.SUCCESS(
-                f'Successfully imported {reader.line_num} rows'
+                f'Successfully imported {len(created)} rows'
             )
         )
