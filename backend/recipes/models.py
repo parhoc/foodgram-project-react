@@ -121,7 +121,7 @@ class Recipe(models.Model):
         validators=(
             MinValueValidator(
                 1,
-                'Время приготовления должно быть не меньше 1'
+                constants.COOKING_TIME_ERROR
             ),
         )
     )
@@ -172,7 +172,7 @@ class RecipeIngredient(models.Model):
         validators=(
             MinValueValidator(
                 1,
-                'Количество должно быть не меньше 1'
+                constants.AMOUNT_ERROR
             ),
         )
     )

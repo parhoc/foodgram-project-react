@@ -17,6 +17,7 @@ from api.serializers import (
     ShoppingCartSerializer,
     TagSerializer,
 )
+from foodgram_backend import constants
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -73,7 +74,6 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
         Download recipes ingredients in shopping cart as PDF.
     """
 
-    REMOVE_ERROR_MESSAGE = 'Recipe is not in the {}.'
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
         IsAuthorAdminOrReadOnly,
@@ -102,7 +102,7 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
     def error_message(self, model):
         """Construct remove from model error message."""
         class_name = utils.class_name(model.__name__)
-        return self.REMOVE_ERROR_MESSAGE.format(class_name)
+        return constants.REMOVE_ERROR_MESSAGE.format(class_name)
 
     def add_to(self, user):
         """Add new record to model based on method serializer."""
@@ -110,7 +110,7 @@ class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
             recipe = self.get_object()
         except Http404:
             return Response(
-                {'errors': 'Recipe does not exist.'},
+                {'errors': constants.RECIPE_DOES_NOT_EXIST},
                 status=status.HTTP_400_BAD_REQUEST
             )
         data = {

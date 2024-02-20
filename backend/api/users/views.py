@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from api.serializers import SubscriptionSerializer
+from foodgram_backend import constants
 from users.models import Subscription
 
 User = get_user_model()
@@ -79,7 +80,7 @@ class CustomUserViewSet(UserViewSet):
                 subscription=subscription)
         except Subscription.DoesNotExist:
             return Response(
-                {'errors': 'Subscription does not exist.'},
+                {'errors': constants.SUBSCRIPTION_DOES_NOT_EXIST},
                 status=status.HTTP_400_BAD_REQUEST
             )
         instance.delete()

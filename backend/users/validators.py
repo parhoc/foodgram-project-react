@@ -6,6 +6,6 @@ from foodgram_backend import constants
 def validate_username(value):
     if value in constants.INVALID_USERNAMES:
         raise ValidationError(
-            f"Username can't be '{value}'",
+            constants.INVALID_USERNAME_MESSAGE.format(value),
             params={'value': value}
         )

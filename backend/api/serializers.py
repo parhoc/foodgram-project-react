@@ -67,7 +67,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     def validate_username(self, value):
         if value in constants.INVALID_USERNAMES:
             error_msg = {
-                'error': f"You can't create user with '{value}' username.",
+                'error': constants.INVALID_USERNAME_MESSAGE.format(value),
             }
             raise serializers.ValidationError(error_msg)
         return value
@@ -301,7 +301,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         ingredients = set(ingredisnt.get('id') for ingredisnt in value)
         print(ingredients)
         if len(set(ingredients)) != len(value):
-            error_msg = {'error': 'All ingredients must be unique'}
+            error_msg = {'error': constants.INGREDIENTS_UNIQUE_ERROR}
             raise serializers.ValidationError(error_msg)
         return value
 
@@ -420,7 +420,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         """
         if value == self.context['request'].user:
             raise serializers.ValidationError(
-                "User can't subscribe to themself."
+                constants.SELF_SUBSCRIPTION_MESSAGE
             )
         return value
 
