@@ -24,11 +24,10 @@ services:
       - static:/app/result_build
   gateway:
     build:
-      dockerfile: Dockerfile
-      context: .
+      dockerfile: infra/Dockerfile
+      context: ../
     ports:
       - 8000:80
     volumes:
       - static:/static
       - media:/media
-      - ../docs/:/usr/share/nginx/html/api/docs/
