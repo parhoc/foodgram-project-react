@@ -1,3 +1,4 @@
+from rest_framework import exceptions
 from rest_framework.response import Response
 
 
@@ -19,3 +20,6 @@ class PartialUpdateMixin:
 
     def perform_update(self, serializer):
         serializer.save()
+
+    def update(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed(request.method)

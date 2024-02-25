@@ -1,7 +1,7 @@
 from django.db.models import F, Sum
 from django.http import FileResponse, Http404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import mixins, permissions, status, viewsets
+from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -56,9 +56,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = IngredientFilter
 
 
-class RecipeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
-                    mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                    PartialUpdateMixin, viewsets.GenericViewSet):
+class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
     """
     Recipe model ViewSet.
 
