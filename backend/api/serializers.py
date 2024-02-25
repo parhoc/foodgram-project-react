@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from .fields import Base64ImageFieldURL
+from .fields import ImageFieldURL
 from foodgram_backend import constants
 from recipes.models import (
     Favorite,
@@ -197,7 +198,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='recipeingredient_set',
         many=True
     )
-    image = Base64ImageFieldURL()
+    image = ImageFieldURL()
     is_in_shopping_cart = serializers.SerializerMethodField(
         read_only=True
     )
@@ -251,7 +252,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         many=True
     )
-    image = Base64ImageFieldURL()
+    image = Base64ImageField()
     ingredients = RecipeIngredientCreateSerializer(
         many=True,
         source='recipeingredient_set'
@@ -336,7 +337,7 @@ class RecipeSimpleSerializer(serializers.ModelSerializer):
     * cooking_time.
     """
 
-    image = Base64ImageFieldURL()
+    image = ImageFieldURL()
 
     class Meta:
         model = Recipe
