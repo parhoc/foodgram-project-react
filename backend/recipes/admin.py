@@ -67,7 +67,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
     )
     filter_horizontal = (
-        'ingredients',
+        'tags',
     )
     inlines = (
         RecipeIngredientInline,
