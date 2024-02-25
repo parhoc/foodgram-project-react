@@ -26,6 +26,8 @@ services:
     build:
       dockerfile: infra/Dockerfile
       context: ../
+    depends_on:
+      - frontend
     ports:
       - 8000:80
     volumes:
