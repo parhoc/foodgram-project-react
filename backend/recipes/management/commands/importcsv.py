@@ -7,7 +7,7 @@ from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
-    help = 'Imports data from csv file to Ingredient table'
+    help = 'Импортирует данные из CSV файла в таблицу Ingredient'
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('file', nargs=1, type=str)
@@ -16,8 +16,8 @@ class Command(BaseCommand):
         with open(options['file'][0], 'r') as file:
             reader = csv.reader(file)
             created = Ingredient.objects.bulk_create(
-                [Ingredient(name=row[0], measurement_unit=row[1])
-                 for row in reader],
+                (Ingredient(name=row[0], measurement_unit=row[1])
+                 for row in reader),
                 ignore_conflicts=True
             )
         self.stdout.write(
