@@ -21,14 +21,6 @@ class CustomUser(AbstractUser):
         verbose_name='Электронная почта',
         unique=True
     )
-    username = models.CharField(
-        max_length=constants.CHAR_FIELD_MAX_LENGTH,
-        verbose_name='Логин',
-        unique=True,
-        validators=(
-            validate_username,
-        )
-    )
     first_name = models.CharField(
         max_length=constants.CHAR_FIELD_MAX_LENGTH,
         verbose_name='Имя',
@@ -37,6 +29,7 @@ class CustomUser(AbstractUser):
         max_length=constants.CHAR_FIELD_MAX_LENGTH,
         verbose_name='Фамилия',
     )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = (
         'username',
@@ -50,6 +43,10 @@ class CustomUser(AbstractUser):
         ordering = (
             'username',
         )
+
+    def clean(self) -> None:
+        validate_username(self.username)
+        super().clean()
 
 
 class Subscription(models.Model):
@@ -94,4 +91,4 @@ class Subscription(models.Model):
         )
 
     def __str__(self):
-        return f'{self.user.username} -> {self.subscription.username}'
+        return f'{self.user} -> {self.subscription}'
