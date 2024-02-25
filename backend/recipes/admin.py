@@ -13,6 +13,7 @@ from .models import (
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """Tag admin model."""
+
     list_display = (
         'name',
         'color',
@@ -30,6 +31,7 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Ingredient admin model."""
+
     list_display = (
         'name',
         'measurement_unit',
@@ -44,15 +46,16 @@ class IngredientAdmin(admin.ModelAdmin):
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
-    extra = 0
+    extra = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Recipe admin model."""
+
     list_display = (
         'name',
-        'author',
+        'author'
     )
     list_filter = (
         'author',
@@ -76,10 +79,16 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorites_count(self, instance):
         return instance.favorings.count()
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields
+        return ()
+
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     """RecipeIngredient admin model."""
+
     list_display = (
         'recipe',
         'ingredient',
@@ -98,6 +107,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     """ShoppingCart admin model."""
+
     list_display = (
         'user',
         'recipe',
@@ -111,6 +121,7 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     """Favorites admin model."""
+
     list_display = (
         'user',
         'recipe',
