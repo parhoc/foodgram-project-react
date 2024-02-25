@@ -85,10 +85,6 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ('create', 'partial_update'):
             return RecipeCreateSerializer
-        if self.action == 'favorite':
-            return FavoriteSerializer
-        if self.action == 'shopping_cart':
-            return ShoppingCartSerializer
         return RecipeSerializer
 
     def perform_create(self, serializer):
@@ -108,12 +104,15 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
             'user': user.pk,
             'recipe': recipe_pk,
         }
-        serializer = self.get_serializer(data=data)
+        serializer = self.serializer_class(
+            data=data,
+            context=self.get_serializer_context()
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            serializer.data, status=status.HTTP_201_CREATED
+        )
 
     def remove_from(self, user, model):
         """Remove record from given model."""
@@ -131,7 +130,8 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
     @action(
         ['post'],
         detail=True,
-        permission_classes=(permissions.IsAuthenticated,)
+        permission_classes=(permissions.IsAuthenticated,),
+        serializer_class=ShoppingCartSerializer
     )
     def shopping_cart(self, request, pk):
         """
@@ -148,7 +148,8 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
     @action(
         ['post'],
         detail=True,
-        permission_classes=(permissions.IsAuthenticated,)
+        permission_classes=(permissions.IsAuthenticated,),
+        serializer_class=FavoriteSerializer
     )
     def favorite(self, request, pk):
         """
@@ -196,4 +197,5 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
         ingredients = self.get_ingredients()
         pdf_buffer = utils.get_pdf(ingredients)
         return FileResponse(
-            pdf_buffer, as_attachment=True, filename='shoppinglist.pdf')
+            pdf_buffer, as_attachment=True, filename='shoppinglist.pdf'
+        )
