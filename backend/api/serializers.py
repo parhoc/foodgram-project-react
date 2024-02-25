@@ -219,7 +219,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-    def __is_in(self, obj, model) -> bool:
+    def _is_in(self, obj, model) -> bool:
         """
         Checks if `obj` in `model` for current user.
         """
@@ -229,10 +229,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         return False
 
     def get_is_in_shopping_cart(self, obj):
-        return self.__is_in(obj, ShoppingCart)
+        return self._is_in(obj, ShoppingCart)
 
     def get_is_favorited(self, obj):
-        return self.__is_in(obj, Favorite)
+        return self._is_in(obj, Favorite)
 
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
@@ -271,12 +271,14 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def create_recipe_ingredients(self, recipe, ingredients):
         """Creates records in RecipeIngredient table."""
-        for ingredient_recipe in ingredients:
-            RecipeIngredient.objects.create(
+        RecipeIngredient.objects.bulk_create(
+            RecipeIngredient(
                 recipe=recipe,
                 ingredient=ingredient_recipe['id'],
                 amount=ingredient_recipe['amount']
             )
+            for ingredient_recipe in ingredients
+        )
 
     def create(self, validated_data):
         tags = validated_data.pop('tags')
@@ -289,6 +291,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('recipeingredient_set')
+        instance.tags.clear()
         instance.tags.set(tags)
         instance.ingredients.clear()
         self.create_recipe_ingredients(instance, ingredients)
@@ -300,7 +303,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, value):
         ingredients = set(ingredisnt.get('id') for ingredisnt in value)
-        print(ingredients)
         if len(set(ingredients)) != len(value):
             error_msg = {'error': constants.INGREDIENTS_UNIQUE_ERROR}
             raise serializers.ValidationError(error_msg)
