@@ -1,5 +1,5 @@
 from django.db.models import F, Sum
-from django.http import FileResponse, Http404
+from django.http import FileResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -102,18 +102,11 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
         class_name = utils.class_name(model.__name__)
         return constants.REMOVE_ERROR_MESSAGE.format(class_name)
 
-    def add_to(self, user):
+    def add_to(self, user, recipe_pk):
         """Add new record to model based on method serializer."""
-        try:
-            recipe = self.get_object()
-        except Http404:
-            return Response(
-                {'errors': constants.RECIPE_DOES_NOT_EXIST},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         data = {
             'user': user.pk,
-            'recipe': recipe.pk,
+            'recipe': recipe_pk,
         }
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -146,7 +139,7 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
 
         Post and delete method. Availible only to authenticated users.
         """
-        return self.add_to(request.user)
+        return self.add_to(request.user, pk)
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk):
@@ -163,7 +156,7 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
 
         Post and delete method. Availible only to authenticated users.
         """
-        return self.add_to(request.user)
+        return self.add_to(request.user, pk)
 
     @favorite.mapping.delete
     def remove_from_favorite(self, request, pk):
