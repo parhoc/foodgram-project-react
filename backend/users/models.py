@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from .validators import validate_username
@@ -92,3 +93,7 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.user} -> {self.subscription}'
+
+    def clean(self) -> None:
+        if self.user == self.subscription:
+            raise ValidationError(constants.SELF_SUBSCRIPTION_MESSAGE)
