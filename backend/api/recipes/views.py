@@ -169,13 +169,12 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
 
         Sum amounts of the same ingredients.
         """
-        recipes = self.request.user.shoppingcart.values_list(
-            'recipe__pk',
-            flat=True
-        )
-        ingredients_amount = RecipeIngredient.objects.filter(
-            recipe__in=recipes)
-        ingredients_sum = ingredients_amount.values(
+        ingredients_sum = RecipeIngredient.objects.filter(
+            recipe__in=self.request.user.shoppingcart.values_list(
+                'recipe__pk',
+                flat=True
+            )
+        ).values(
             name=F('ingredient__name'),
             measurement_unit=F('ingredient__measurement_unit')
         ).annotate(
