@@ -59,12 +59,11 @@ class CustomUserViewSet(UserViewSet):
         Post and delete method. Availible only to authenticated users.
         """
         subscription = self.get_object()
-        data = {
-            'user': request.user.pk,
-            'subscription': subscription.pk,
-        }
         serializer = SubscriptionSerializer(
-            data=data,
+            data={
+                'user': request.user.pk,
+                'subscription': subscription.pk,
+            },
             context=self.get_serializer_context()
         )
         serializer.is_valid(raise_exception=True)

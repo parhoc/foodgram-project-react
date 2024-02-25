@@ -100,12 +100,11 @@ class RecipeViewSet(PartialUpdateMixin, viewsets.ModelViewSet):
 
     def add_to(self, user, recipe_pk):
         """Add new record to model based on method serializer."""
-        data = {
-            'user': user.pk,
-            'recipe': recipe_pk,
-        }
         serializer = self.serializer_class(
-            data=data,
+            data={
+                'user': user.pk,
+                'recipe': recipe_pk,
+            },
             context=self.get_serializer_context()
         )
         serializer.is_valid(raise_exception=True)
