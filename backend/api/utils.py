@@ -10,7 +10,7 @@ from borb.pdf import Alignment
 from borb.pdf.canvas.font.simple_font.true_type_font import TrueTypeFont
 from django.contrib.staticfiles import finders
 
-FORMAT_STRING = '{name} ({measurement_unit}) - {amount_sum}'
+FORMAT_STRING = '• {name} ({measurement_unit}) - {amount_sum}'
 SPLIT_REGEX = re.compile('(?<=.)(?=[A-Z])')
 FONT_FILE = 'fonts/arialnova_light.ttf'
 
@@ -64,13 +64,11 @@ def get_pdf(ingredients, format_string=None, font_path=None):
         font=custom_font,
         horizontal_alignment=Alignment.CENTERED
     ))
-    pdf_list = pdf.UnorderedList()
     for ingredient in ingredients:
-        pdf_list.add(pdf.Paragraph(
+        layout.add(pdf.LineOfText(
             format_string.format(**ingredient),
             font=custom_font
         ))
-    layout.add(pdf_list)
     buffer = io.BytesIO()
     save_pdf(buffer, document)
     buffer.seek(0)
