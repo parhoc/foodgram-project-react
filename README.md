@@ -29,6 +29,28 @@ sudo sh ./get-docker.sh
 ```
 sudo apt install docker-compose-plugin
 ```
+### Настройки
+Для настройки проекта неоходимо создать `.env` файл в директории с docker compose файлом со следующим содерфимым:
+```
+# имя базы данных
+POSTGRES_DB=foodgram
+# имя пользователя
+POSTGRES_USER=foodgram_user
+# пароль пользователя
+POSTGRES_PASSWORD=foodgram
+# имя контейнера с БД
+DB_HOST=db
+# порт БД
+DB_PORT=5432
+# секретный ключ проекта
+SECRET_KEY=key
+# режим запуска проекта: 0 - деплой, 1 - разработка
+DEBUG=0
+# разрешенные хосты приложения
+HOST=127.0.0.1 localhost
+# тип базы данных
+ENGINE=django.db.backends.postgresql
+```
 ### Через Docker hub
 Скачать файл ``docker-compose.production.yml``
 
@@ -40,44 +62,11 @@ docker compose -f docker-compose.production.yml up -d
 ```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
 ```
-Собрать статуку:
+Собрать статику:
 ```
 sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
-#### Установка и настройка Nginx
-Если Nginx уже установлен, то загрузку и запуск можно пропустить.
-
-Установить Nginx:
-```
-sudo apt install nginx -y
-```
-Запустить Nginx командой:
-```
-sudo systemctl start nginx
-```
-Обновить настройки Nginx:
-```
-sudo nano /etc/nginx/sites-enabled/default
-```
-В открывшемся файле записать настройки сервера:
-```
-server {
-  listen 80;
-  server_name ваш_домен;
-
-  location / {
-    proxy_pass http://127.0.0.1:8000;
-  }
-}
-```
-Сохраните и закройте файл.
-
-Перезагрузите конфигурацию Nginx:
-```
-sudo systemctl reload nginx
-```
-Сайт будет доступен по вашему домену.
 ### Локальная установка
 Клонировать рапозиторий:
 ```
@@ -91,7 +80,7 @@ docker compose up -d
 ```
 sudo docker compose exec backend python manage.py migrate
 ```
-Собрать статуку:
+Собрать статику:
 ```
 sudo docker compose exec backend python manage.py collectstatic
 sudo docker compose exec backend cp -r /app/collected_static/. /backend_static/static/
@@ -113,3 +102,6 @@ Docker compose включает три контейнера:
 ### Список покупок и избранное
 ![alt text](https://pictures.s3.yandex.net/resources/S16_07_1692340247.png)
 Каждый рецепт можно добавить в список покупок или избранное. Список покупок можно скачать в виде PDF файла с необходимыми для рецептов ингредиентами их количеством.
+### Список подписок
+![alt text](https://pictures.s3.yandex.net/resources/S16_05_1692340215.png)
+Также пользователь может подписаться непосредственно на другого пользователя и просматривать его рецепты.
