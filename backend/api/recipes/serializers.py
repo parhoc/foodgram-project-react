@@ -1,5 +1,3 @@
-from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -14,64 +12,6 @@ from recipes.models import (
     ShoppingCart,
     Tag,
 )
-from users.models import Subscription
-
-User = get_user_model()
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
-    """
-    User model serializer.
-
-    Include fields:
-    * email;
-    * id (read only);
-    * username;
-    * first_name;
-    * last_name;
-    * is_subscribed (read only) - custom field, if current user
-    subscribed on specified user.
-    """
-
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-        )
-
-    def get_is_subscribed(self, obj):
-        user = self.context['request'].user
-        return (user.is_authenticated
-                and user.subscriptions.filter(subscription=obj).exists())
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-    """
-    User model create serializer.
-
-    Include fields:
-    * email;
-    * id (read only);
-    * username;
-    * first_name;
-    * last_name;
-    * password (write only).
-    """
-
-    def validate_username(self, value):
-        if value in constants.INVALID_USERNAMES:
-            error_msg = {
-                'error': constants.INVALID_USERNAME_MESSAGE.format(value),
-            }
-            raise serializers.ValidationError(error_msg)
-        return value
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -116,6 +56,49 @@ class IngredientSerializer(serializers.ModelSerializer):
             'name',
             'measurement_unit',
         )
+
+
+class LimitedListSerializer(serializers.ListSerializer):
+    """
+    ListSerializer with limited number of return values.
+
+    Number of return values limited by `recipe_limit` query parameter.
+    """
+
+    def to_representation(self, data):
+        recipes_limit = self.context['request'].query_params.get(
+            'recipes_limit')
+        if recipes_limit is not None:
+            try:
+                recipes_limit = int(recipes_limit)
+                data = data.all()[:recipes_limit]
+            except ValueError:
+                pass
+        return super().to_representation(data)
+
+
+class RecipeSimpleSerializer(serializers.ModelSerializer):
+    """
+    Recipe model serializer with fewer fields.
+
+    Include fields:
+    * id (read only);
+    * name;
+    * image;
+    * cooking_time.
+    """
+
+    image = ImageFieldURL()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time',
+        )
+        list_serializer_class = LimitedListSerializer
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -191,6 +174,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     * text;
     * cooking_time.
     """
+
+    from api.users.serializers import CustomUserSerializer
 
     author = CustomUserSerializer(read_only=True)
     tags = TagSerializer(many=True)
@@ -307,131 +292,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             error_msg = {'error': constants.INGREDIENTS_UNIQUE_ERROR}
             raise serializers.ValidationError(error_msg)
         return value
-
-
-class LimitedListSerializer(serializers.ListSerializer):
-    """
-    ListSerializer with limited number of return values.
-
-    Number of return values limited by `recipe_limit` query parameter.
-    """
-
-    def to_representation(self, data):
-        recipes_limit = self.context['request'].query_params.get(
-            'recipes_limit')
-        if recipes_limit is not None:
-            try:
-                recipes_limit = int(recipes_limit)
-                data = data.all()[:recipes_limit]
-            except ValueError:
-                pass
-        return super().to_representation(data)
-
-
-class RecipeSimpleSerializer(serializers.ModelSerializer):
-    """
-    Recipe model serializer with fewer fields.
-
-    Include fields:
-    * id (read only);
-    * name;
-    * image;
-    * cooking_time.
-    """
-
-    image = ImageFieldURL()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time',
-        )
-        list_serializer_class = LimitedListSerializer
-
-
-class UserSubscriberSerializer(CustomUserSerializer):
-    """
-    User model serializer for subscription response.
-
-    Include fields:
-    * email;
-    * id (read only);
-    * username;
-    * first_name;
-    * last_name;
-    * is_subscribed (read only) - custom field, if current user
-    subscribed on specified user.
-    * recipes (read only) - user recipes, many;
-    * recipes_count (read only) - custom field.
-    """
-
-    recipes_count = serializers.SerializerMethodField()
-    recipes = RecipeSimpleSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = User
-        fields = (
-            'email',
-            'id',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'recipes',
-            'recipes_count',
-        )
-
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
-
-
-class SubscriptionSerializer(serializers.ModelSerializer):
-    """
-    Subscription model serializer.
-
-    Include fields:
-    * user;
-    * subscription.
-
-    User and subscription pair must be unique.
-    """
-
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all()
-    )
-    subscription = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all()
-    )
-
-    class Meta:
-        model = Subscription
-        fields = (
-            'user',
-            'subscription',
-        )
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Subscription.objects.all(),
-                fields=('user', 'subscription')
-            ),
-        ]
-
-    def validate_subscription(self, value):
-        """
-        Validate that `user` is not equal to `subscription`.
-        """
-        if value == self.context['request'].user:
-            raise serializers.ValidationError(
-                constants.SELF_SUBSCRIPTION_MESSAGE
-            )
-        return value
-
-    def to_representation(self, instance):
-        return UserSubscriberSerializer(
-            context=self.context).to_representation(instance.subscription)
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

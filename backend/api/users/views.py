@@ -4,7 +4,7 @@ from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api.serializers import SubscriptionSerializer
+from .serializers import SubscriptionSerializer
 from foodgram_backend import constants
 from users.models import Subscription
 

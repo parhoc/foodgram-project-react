@@ -6,10 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .filters import IngredientFilter, RecipeFilter
-from api import utils
-from api.mixins import PartialUpdateMixin
-from api.permissions import IsAuthorAdminOrReadOnly
-from api.serializers import (
+from .mixins import PartialUpdateMixin
+from .serializers import (
     FavoriteSerializer,
     IngredientSerializer,
     RecipeCreateSerializer,
@@ -17,6 +15,8 @@ from api.serializers import (
     ShoppingCartSerializer,
     TagSerializer,
 )
+from api import utils
+from api.permissions import IsAuthorAdminOrReadOnly
 from foodgram_backend import constants
 from recipes.models import (
     Favorite,
