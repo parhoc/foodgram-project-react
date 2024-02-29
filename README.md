@@ -30,7 +30,7 @@ sudo sh ./get-docker.sh
 sudo apt install docker-compose-plugin
 ```
 ### Настройки
-Для настройки проекта неоходимо создать `.env` файл в директории с docker compose файлом со следующим содерфимым:
+Для настройки проекта неоходимо создать `.env` файл в директории с docker compose файлом со следующим содержимым:
 ```
 # имя базы данных
 POSTGRES_DB=foodgram
