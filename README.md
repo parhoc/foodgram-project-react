@@ -68,7 +68,7 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/collected_static/. /backend_static/static/
 ```
 ### Локальная установка
-Клонировать рапозиторий:
+Клонировать репозиторий:
 ```
 git clone https://github.com/parhoc/foodgram-project-react.git
 ```
